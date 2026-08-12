@@ -57,28 +57,42 @@
           <option>4 sets</option>
           <option>5+ sets</option>
         </select>
+        <label for="date">Preferred appointment date</label>
+        <input id="date" type="date">
         <label for="notes">Notes (optional)</label>
-        <textarea id="notes" rows="3" placeholder="Nail shape, length, date needed..."></textarea>
-        <button type="submit">Order via Instagram DM</button>
+        <textarea id="notes" rows="3" placeholder="Nail shape, length, occasion, reference design..."></textarea>
+        <button type="submit">Book &amp; pay deposit · ToroPay</button>
+        <button type="button" id="dmOnly" style="margin-top:14px; background:transparent; border-color:rgba(201,162,75,.4); color:var(--gold);">Just DM me the order</button>
       </form>
-      <p class="note">Submitting copies your order details and opens Instagram DM — just paste and send. We'll take it from there.</p>
+      <p class="note">Paying the deposit via the ToroPay link opens in a new tab and reserves your slot — the remaining balance is due after the service. Either way, your order details are copied to your clipboard and pasted into the DM we open for you.</p>
     </div>
   </main>
 </div>
 <script>
-  document.getElementById('orderForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var name=document.getElementById('name').value;
-    var contact=document.getElementById('contact').value;
-    var qty=document.getElementById('qty').value;
-    var notes=document.getElementById('notes').value;
-    var product=document.getElementById('product').value;
-    var msg='Hi Mimi by Nandini! I\'d like to order:\n\n\u2022 Product: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(notes?'\n\u2022 Notes: '+notes:'');
+  var TOROPAY_LINK = 'https://www.toropay.co.in/pay/yourstore'; // CONFIG - paste your ToroPay payment link
+  var IG_DM = 'https://ig.me/m/xd_nandinee';
+  var nameEl=document.getElementById('name'), contactEl=document.getElementById('contact'),
+      qtyEl=document.getElementById('qty'), dateEl=document.getElementById('date'),
+      notesEl=document.getElementById('notes'), productEl=document.getElementById('product');
+  function buildMsg(){
+    var name=nameEl.value, contact=contactEl.value, qty=qtyEl.value,
+        date=dateEl.value, notes=notesEl.value, product=productEl.value;
+    return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Deposit: paying now via your payment link\n\u2022 Remaining balance: after my appointment';
+  }
+  function sendDM(msg){
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
-      window.location.href='https://ig.me/m/mimibynandine';
+      window.location.href = IG_DM;
     }).catch(function(){
       window.prompt('Copy this message and paste it in the DM:', msg);
     });
+  }
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    window.open(TOROPAY_LINK, '_blank');
+    sendDM(buildMsg());
+  });
+  document.getElementById('dmOnly').addEventListener('click', function(){
+    sendDM(buildMsg());
   });
 </script>
 </body>
