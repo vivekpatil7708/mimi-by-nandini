@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Set 01 — Mimi by Nandini</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;1,500&family=Jost:wght@300;400;500&display=swap');
+  :root{ --black:#0b0706; --wine:#8d0b0b; --wine-bright:#c31414; --gold:#c9a24b; --ink:#f6efe7; --ink-dim:#cbb9ac; }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--black); color:var(--ink); font-family:'Jost',sans-serif; -webkit-font-smoothing:antialiased;}
+  a{color:inherit; text-decoration:none;}
+  .wrap{max-width:1000px; margin:0 auto; padding:0 24px;}
+  header{display:flex; align-items:center; justify-content:space-between; padding:24px 0; border-bottom:1px solid rgba(201,162,75,.18);}
+  .mark{font-family:'Fraunces',serif; font-style:italic; font-size:18px;}
+  .mark .by{font-family:'Jost',sans-serif; font-style:normal; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); margin-left:4px;}
+  .back{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--gold); border-bottom:1px solid rgba(201,162,75,.4); padding-bottom:3px;}
+  main{display:grid; grid-template-columns:1fr 1fr; gap:56px; padding:56px 0 80px; align-items:start;}
+  .photo{border-radius:4px; overflow:hidden; box-shadow:0 30px 70px -20px rgba(0,0,0,.7);}
+  .photo img{width:100%; display:block; aspect-ratio:3/4; object-fit:cover;}
+  .tag{font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--gold);}
+  h1{font-size:32px; font-weight:500; margin:8px 0 6px;}
+  .p{color:var(--ink-dim); line-height:1.7; margin:14px 0 8px; font-size:15px;}
+  label{display:block; font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim); margin:18px 0 8px;}
+  input, select, textarea{width:100%; background:transparent; border:1px solid rgba(246,239,231,.2); color:var(--ink); padding:13px 14px; font-size:15px; border-radius:3px; font-family:inherit;}
+  input:focus, select:focus, textarea:focus{outline:none; border-color:var(--gold);}
+  select option{background:var(--black);}
+  button{width:100%; margin-top:30px; background:var(--wine); color:var(--ink); border:1px solid var(--wine); padding:16px; font-size:12px; letter-spacing:.16em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:background .25s ease, border-color .25s ease;}
+  button:hover{background:var(--wine-bright); border-color:var(--wine-bright);}
+  .note{font-size:12px; color:var(--ink-dim); line-height:1.7; margin-top:14px;}
+  @media(max-width:760px){ main{grid-template-columns:1fr; gap:32px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="mark">Mimi<span class="by">by Nandini</span></div>
+    <a class="back" href="index.html">&#8592; Back to gallery</a>
+  </header>
+  <main>
+    <div class="photo"><img src="images/product-01.jpg" alt="Set 01"></div>
+    <div>
+      <span class="tag">Set 01</span>
+      <h1>Order this set</h1>
+      <p class="p">Tell us a little about your order — we'll confirm everything over Instagram DM.</p>
+      <form id="orderForm">
+        <input type="hidden" id="product" value="Set 01">
+        <label for="name">Your name</label>
+        <input id="name" required placeholder="Full name">
+        <label for="contact">Contact (Instagram or phone)</label>
+        <input id="contact" required placeholder="@yourhandle or phone number">
+        <label for="qty">Quantity</label>
+        <select id="qty">
+          <option>1 set</option>
+          <option>2 sets</option>
+          <option>3 sets</option>
+          <option>4 sets</option>
+          <option>5+ sets</option>
+        </select>
+        <label for="notes">Notes (optional)</label>
+        <textarea id="notes" rows="3" placeholder="Nail shape, length, date needed..."></textarea>
+        <button type="submit">Order via Instagram DM</button>
+      </form>
+      <p class="note">Submitting copies your order details and opens Instagram DM — just paste and send. We'll take it from there.</p>
+    </div>
+  </main>
+</div>
+<script>
+  document.getElementById('orderForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var name=document.getElementById('name').value;
+    var contact=document.getElementById('contact').value;
+    var qty=document.getElementById('qty').value;
+    var notes=document.getElementById('notes').value;
+    var product=document.getElementById('product').value;
+    var msg='Hi Mimi by Nandini! I\'d like to order:\n\n\u2022 Product: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(notes?'\n\u2022 Notes: '+notes:'');
+    (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
+      window.location.href='https://ig.me/m/mimibynandine';
+    }).catch(function(){
+      window.prompt('Copy this message and paste it in the DM:', msg);
+    });
+  });
+</script>
+</body>
+</html>
