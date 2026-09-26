@@ -635,7 +635,7 @@
   <h2>Let's design your <em>next set.</em></h2>
   <p>Every booking starts with a quick DM — tell Nandini the vibe, the occasion, or send a reference, and she'll sketch it out before it ever touches a nail. Reserve your slot with a small deposit today; the remaining payment is due after your service.</p>
   <div class="book-actions">
-    <a class="btn-primary" href="#" id="bookDeposit">Book appointment · Pay deposit</a>
+    <a class="btn-primary" href="#" id="bookDeposit">Book appointment &middot; Pay deposit</a>
     <a class="btn-text" href="https://www.instagram.com/xd_nandinee/" target="_blank" rel="noopener">DM @xd_nandinee</a>
   </div>
   <p class="note" style="color:var(--ink-dim); font-size:12.5px; letter-spacing:.06em; margin-top:22px;">₹500 deposit today via payment link — balance after your appointment. Sets are priced per design; charm, chrome and gem add-ons are quoted over DM.</p>
@@ -691,15 +691,15 @@
     <div class="cart-row"><span>Total</span><span class="v" id="cartTotal">&#8377;0</span></div>
     <div class="cart-row"><span>Deposit today</span><span class="v" id="cartDeposit">&#8377;500</span></div>
     <div class="cart-row total"><span>Balance after appointment</span><span class="v" id="cartBalance">&#8377;0</span></div>
-    <button class="cart-checkout" id="cartCheckout">Pay deposit &amp; send order</button>
+    <button class="cart-checkout" id="cartCheckout">Continue to payment &amp; send order</button>
     <button class="cart-clear" id="cartClear">Clear bag</button>
     <p class="note">The deposit opens our payment link and reserves your slot. Your order list is copied to your clipboard for the DM we open.</p>
   </div>
 </aside>
 
 <script>
-  // CONFIG — replace with your ToroPay payment link (create one at toropay.co.in)
-  const TOROPAY_LINK = 'https://www.toropay.co.in/pay/yourstore';
+  // ToroPay payment link (staging / test mode) - swap this URL for the live one before launch
+  const TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f';
   const IG_DM = 'https://ig.me/m/xd_nandinee';
 
   // Deposit CTA: open payment link, then DM to confirm the appointment
