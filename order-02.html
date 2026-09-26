@@ -27,6 +27,9 @@
   select option{background:var(--black);}
   button{width:100%; margin-top:30px; background:var(--wine); color:var(--ink); border:1px solid var(--wine); padding:16px; font-size:12px; letter-spacing:.16em; text-transform:uppercase; border-radius:2px; cursor:pointer; transition:background .25s ease, border-color .25s ease;}
   button:hover{background:var(--wine-bright); border-color:var(--wine-bright);}
+  .price-row{display:flex; align-items:baseline; gap:12px; flex-wrap:wrap; margin:10px 0 2px;}
+  .price{font-family:'Fraunces',serif; font-size:28px; color:var(--gold);}
+  .price-note{font-size:11px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink-dim);}
   .note{font-size:12px; color:var(--ink-dim); line-height:1.7; margin-top:14px;}
   @media(max-width:760px){ main{grid-template-columns:1fr; gap:32px;} }
 </style>
@@ -42,9 +45,10 @@
     <div>
       <span class="tag">Set 02</span>
       <h1>Order this set</h1>
+      <div class="price-row"><span class="price">₹1,499</span><span class="price-note">per set &#183; ₹500 deposit to reserve</span></div>
       <p class="p">Tell us a little about your order — we'll confirm everything over Instagram DM.</p>
       <form id="orderForm">
-        <input type="hidden" id="product" value="Set 02">
+        <input type="hidden" id="product" value="Set 02"><input type="hidden" id="price" value="₹1,499">
         <label for="name">Your name</label>
         <input id="name" required placeholder="Full name">
         <label for="contact">Contact (Instagram or phone)</label>
@@ -64,7 +68,7 @@
         <button type="submit">Book &amp; pay deposit · ToroPay</button>
         <button type="button" id="dmOnly" style="margin-top:14px; background:transparent; border-color:rgba(201,162,75,.4); color:var(--gold);">Just DM me the order</button>
       </form>
-      <p class="note">Paying the deposit via the ToroPay link opens in a new tab and reserves your slot — the remaining balance is due after the service. Either way, your order details are copied to your clipboard and pasted into the DM we open for you.</p>
+      <p class="note">Paying the ₹500 deposit via the ToroPay link opens in a new tab and reserves your slot — the remaining balance is due after the service. Either way, your order details are copied to your clipboard and pasted into the DM we open for you.</p>
     </div>
   </main>
 </div>
@@ -73,11 +77,11 @@
   var IG_DM = 'https://ig.me/m/xd_nandinee';
   var nameEl=document.getElementById('name'), contactEl=document.getElementById('contact'),
       qtyEl=document.getElementById('qty'), dateEl=document.getElementById('date'),
-      notesEl=document.getElementById('notes'), productEl=document.getElementById('product');
+      notesEl=document.getElementById('notes'), productEl=document.getElementById('product'), priceEl=document.getElementById('price');
   function buildMsg(){
     var name=nameEl.value, contact=contactEl.value, qty=qtyEl.value,
         date=dateEl.value, notes=notesEl.value, product=productEl.value;
-    return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Deposit: paying now via your payment link\n\u2022 Remaining balance: after my appointment';
+    return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Set price: '+priceEl.value+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Deposit: paying now via your payment link\n\u2022 Remaining balance: after my appointment';
   }
   function sendDM(msg){
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
