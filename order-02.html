@@ -45,7 +45,7 @@
     <div>
       <span class="tag">Set 02</span>
       <h1>Order this set</h1>
-      <div class="price-row"><span class="price">₹1,499</span><span class="price-note">per set &#183; ₹500 deposit to reserve</span></div>
+      <div class="price-row"><span class="price">₹1,499</span><span class="price-note">per set &#183; paid in full at booking</span></div>
       <p class="p">Tell us a little about your order — we'll confirm everything over Instagram DM.</p>
       <form id="orderForm">
         <input type="hidden" id="product" value="Set 02"><input type="hidden" id="price" value="₹1,499">
@@ -53,35 +53,37 @@
         <input id="name" required placeholder="Full name">
         <label for="contact">Contact (Instagram or phone)</label>
         <input id="contact" required placeholder="@yourhandle or phone number">
+        <label for="email">Email (for the payment receipt)</label>
+        <input id="email" type="email" placeholder="you@example.com">
         <label for="qty">Quantity</label>
         <select id="qty">
           <option>1 set</option>
           <option>2 sets</option>
           <option>3 sets</option>
           <option>4 sets</option>
-          <option>5+ sets</option>
+          <option>5 sets</option>
         </select>
         <label for="date">Preferred appointment date</label>
         <input id="date" type="date">
         <label for="notes">Notes (optional)</label>
         <textarea id="notes" rows="3" placeholder="Nail shape, length, occasion, reference design..."></textarea>
-        <button type="submit">Book &amp; pay deposit · ToroPay</button>
+        <button type="submit">Book &amp; pay · ToroPay</button>
         <button type="button" id="dmOnly" style="margin-top:14px; background:transparent; border-color:rgba(201,162,75,.4); color:var(--gold);">Just DM me the order</button>
       </form>
-      <p class="note">Paying the ₹500 deposit via the ToroPay link opens in a new tab and reserves your slot — the remaining balance is due after the service. Either way, your order details are copied to your clipboard and pasted into the DM we open for you.</p>
+      <p class="note">Paying via the ToroPay link opens in a new tab and reserves your slot. Either way, your order details are copied to your clipboard and pasted into the DM we open for you.</p>
     </div>
   </main>
 </div>
 <script>
-  var TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f'; // ToroPay payment link (staging/test mode)
+    var TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f';
   var IG_DM = 'https://ig.me/m/xd_nandinee';
   var nameEl=document.getElementById('name'), contactEl=document.getElementById('contact'),
-      qtyEl=document.getElementById('qty'), dateEl=document.getElementById('date'),
+      qtyEl=document.getElementById('qty'), dateEl=document.getElementById('date'), emailEl=document.getElementById('email'),
       notesEl=document.getElementById('notes'), productEl=document.getElementById('product'), priceEl=document.getElementById('price');
   function buildMsg(){
-    var name=nameEl.value, contact=contactEl.value, qty=qtyEl.value,
+    var name=nameEl.value, contact=contactEl.value, qty=qtyEl.value, email=emailEl.value.trim(),
         date=dateEl.value, notes=notesEl.value, product=productEl.value;
-    return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Set price: '+priceEl.value+'\n\u2022 Name: '+name+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Deposit: paying now via your payment link\n\u2022 Remaining balance: after my appointment';
+    return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Set price: '+priceEl.value+'\n\u2022 Name: '+name+'\n\u2022 Email: '+email+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Paying in full now';
   }
   function sendDM(msg){
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
@@ -90,10 +92,41 @@
       window.prompt('Copy this message and paste it in the DM:', msg);
     });
   }
-  document.getElementById('orderForm').addEventListener('submit', function(e){
+  document.getElementById('orderForm').addEventListener('submit', async function(e){
     e.preventDefault();
-    window.open(TOROPAY_LINK, '_blank');
-    sendDM(buildMsg());
+    var submitBtn = e.target.querySelector('button[type=submit]');
+    var original = submitBtn.textContent;
+    var msg = buildMsg();
+    var payUrl = TOROPAY_LINK;
+    if(emailEl.value.trim()){
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Starting payment...';
+      try {
+        var res = await fetch('/api/checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sets: [{ id: productEl.value.replace(/\D/g,''), qty: parseInt(qtyEl.value, 10) || 1 }],
+            customer: {
+              name: nameEl.value.trim(),
+              email: emailEl.value.trim(),
+              contact: contactEl.value.trim(),
+              date: dateEl.value,
+              notes: notesEl.value.trim()
+            }
+          })
+        });
+        var data = await res.json();
+        if(res.ok && data.checkout_url){ payUrl = data.checkout_url; }
+        else { console.warn('checkout API unavailable, using payment link:', data && data.error); }
+      } catch(err) {
+        console.warn('checkout API unreachable, using payment link:', err);
+      }
+      submitBtn.disabled = false;
+      submitBtn.textContent = original;
+    }
+    if(!window.open(payUrl, '_blank')){ window.location.href = payUrl; }
+    sendDM(msg);
   });
   document.getElementById('dmOnly').addEventListener('click', function(){
     sendDM(buildMsg());

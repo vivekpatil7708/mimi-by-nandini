@@ -302,7 +302,12 @@
     cursor:pointer; padding:4px 6px; font-family:inherit;
   }
   .cart-head .cart-close:hover{color:var(--gold);}
-  .cart-items{flex:1; overflow-y:auto; min-height:110px; padding:6px 24px;}
+  .cart-items{flex:none; min-height:110px; padding:6px 24px;}
+.cart-scroll{
+    flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  }
+.cart-head{flex:0 0 auto;}
+.cart-foot{flex:0 0 auto;}
   .cart-item{
     display:flex; align-items:center; gap:14px;
     padding:14px 0; border-bottom:1px solid rgba(246,239,231,.08);
@@ -613,7 +618,7 @@
       <span class="service-idx">01</span>
       <span class="service-name">Custom Press-On Set</span>
       <span class="service-desc">A made-to-fit press-on set built on your exact nail shape — hand-painted to order, sealed glass-glossy, reusable, and ready to wear with no salon visit.</span>
-      <span class="service-note">Sets from ₹1,499 · deposit to book</span>
+      <span class="service-note">Sets from ₹1,499 · pay in full at booking</span>
     </div>
     <div class="service-row">
       <span class="service-idx">02</span>
@@ -633,12 +638,12 @@
 <section class="book" id="book">
   <span class="kicker">Ready when you are</span>
   <h2>Let's design your <em>next set.</em></h2>
-  <p>Every booking starts with a quick DM — tell Nandini the vibe, the occasion, or send a reference, and she'll sketch it out before it ever touches a nail. Reserve your slot with a small deposit today; the remaining payment is due after your service.</p>
+  <p>Every booking starts with a quick DM — tell Nandini the vibe, the occasion, or send a reference, and she'll sketch it out before it ever touches a nail. Pick your set, pay in full when you book, and your slot is reserved.</p>
   <div class="book-actions">
-    <a class="btn-primary" href="#" id="bookDeposit">Book appointment &middot; Pay deposit</a>
+    <a class="btn-primary" href="#" id="bookDeposit">Book an appointment</a>
     <a class="btn-text" href="https://www.instagram.com/xd_nandinee/" target="_blank" rel="noopener">DM @xd_nandinee</a>
   </div>
-  <p class="note" style="color:var(--ink-dim); font-size:12.5px; letter-spacing:.06em; margin-top:22px;">₹500 deposit today via payment link — balance after your appointment. Sets are priced per design; charm, chrome and gem add-ons are quoted over DM.</p>
+  <p class="note" style="color:var(--ink-dim); font-size:12.5px; letter-spacing:.06em; margin-top:22px;">Each set is priced individually and paid in full at checkout. Charm, chrome and gem add-ons are quoted over DM.</p>
 </section>
 
 <footer>
@@ -663,8 +668,9 @@
     <h3>Your bag</h3>
     <button class="cart-close" id="cartClose" aria-label="Close bag">&times;</button>
   </div>
-  <div class="cart-items" id="cartItems"></div>
-  <div class="cart-form" id="cartForm">
+  <div class="cart-scroll">
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-form" id="cartForm">
     <div class="cf-row">
       <div>
         <label for="cName">Your name</label>
@@ -677,35 +683,39 @@
     </div>
     <div class="cf-row">
       <div>
+        <label for="cEmail">Email (for the receipt)</label>
+        <input id="cEmail" type="email" placeholder="you@example.com">
+      </div>
+      <div>
         <label for="cDate">Preferred date</label>
         <input id="cDate" type="date">
       </div>
+    </div>
+    <div class="cf-row">
       <div>
         <label for="cNotes">Notes (optional)</label>
         <input id="cNotes" placeholder="Shape, length...">
       </div>
     </div>
   </div>
+  </div>
   <div class="cart-foot">
     <div class="cart-row"><span>Sets</span><span class="v" id="cartSets">0</span></div>
-    <div class="cart-row"><span>Total</span><span class="v" id="cartTotal">&#8377;0</span></div>
-    <div class="cart-row"><span>Deposit today</span><span class="v" id="cartDeposit">&#8377;500</span></div>
-    <div class="cart-row total"><span>Balance after appointment</span><span class="v" id="cartBalance">&#8377;0</span></div>
+    <div class="cart-row total"><span>Total payable now</span><span class="v" id="cartTotal">&#8377;0</span></div>
     <button class="cart-checkout" id="cartCheckout">Continue to payment &amp; send order</button>
     <button class="cart-clear" id="cartClear">Clear bag</button>
-    <p class="note">The deposit opens our payment link and reserves your slot. Your order list is copied to your clipboard for the DM we open.</p>
+    <p class="note">Paying in full reserves your slot. Your order list is copied to your clipboard for the DM we open.</p>
   </div>
 </aside>
 
 <script>
-  // ToroPay payment link (staging / test mode) - swap this URL for the live one before launch
   const TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f';
   const IG_DM = 'https://ig.me/m/xd_nandinee';
 
-  // Deposit CTA: open payment link, then DM to confirm the appointment
+  // Booking CTA: open the payment link, then DM to confirm the appointment
   document.getElementById('bookDeposit').addEventListener('click', function(e){
     e.preventDefault();
-    window.open(TOROPAY_LINK, '_blank');
+    if (!window.open(TOROPAY_LINK, '_blank')) window.location.href = TOROPAY_LINK;
     window.location.href = IG_DM;
   });
 
@@ -864,7 +874,6 @@
 
   // ---------- Cart: add sets, then check out all at once ----------
   (function(){
-    const DEPOSIT = 500;
     const RS = '\u20B9';
     const KEY = 'mimi_cart_v1';
     const bar = document.getElementById('cartBar');
@@ -876,8 +885,6 @@
     const formWrap = document.getElementById('cartForm');
     const elSets = document.getElementById('cartSets');
     const elTotal = document.getElementById('cartTotal');
-    const elDeposit = document.getElementById('cartDeposit');
-    const elBalance = document.getElementById('cartBalance');
     const cards = Array.from(document.querySelectorAll('.ccard'));
 
     const catalog = {};
@@ -905,7 +912,7 @@
     function totals(){
       let sets = 0, total = 0;
       keys().forEach(k => { sets += cart[k]; total += catalog[k].price * cart[k]; });
-      return { sets, total, balance: Math.max(0, total - DEPOSIT) };
+      return { sets, total };
     }
 
     function toggle(id){
@@ -945,8 +952,6 @@
       formWrap.classList.toggle('show', ks.length > 0);
       elSets.textContent = String(t.sets);
       elTotal.textContent = fmt(t.total);
-      elDeposit.textContent = fmt(DEPOSIT);
-      elBalance.textContent = fmt(t.balance);
     }
 
     itemsEl.addEventListener('click', (e) => {
@@ -970,26 +975,51 @@
       cart = {}; save(); render();
     });
 
-    document.getElementById('cartCheckout').addEventListener('click', function(){
+    const checkoutBtn = document.getElementById('cartCheckout');
+    checkoutBtn.addEventListener('click', async function(){
       const ks = keys();
       if (!ks.length) return;
       const t = totals();
       const name = document.getElementById('cName').value.trim();
+      const email = document.getElementById('cEmail').value.trim();
       const contact = document.getElementById('cContact').value.trim();
       const date = document.getElementById('cDate').value;
       const notes = document.getElementById('cNotes').value.trim();
+      if (!name) { alert('Please enter your name'); return; }
       const lines = ks.map(k => '\u2022 ' + catalog[k].name + ' \u00D7 ' + cart[k] + ' \u2014 ' + fmt(catalog[k].price) + ' each').join('\n');
       const msg = 'Hi Mimi by Nandini! I\'d like to book ' + t.sets + ' set' + (t.sets === 1 ? '' : 's') + ':\n\n' + lines +
         '\n\n\u2022 Total: ' + fmt(t.total) +
-        '\n\u2022 Deposit today: ' + fmt(DEPOSIT) +
-        '\n\u2022 Balance after appointment: ' + fmt(t.balance) +
+        '\n\u2022 Paying in full now' +
         (name ? '\n\u2022 Name: ' + name : '') +
+        (email ? '\n\u2022 Email: ' + email : '') +
         (contact ? '\n\u2022 Contact: ' + contact : '') +
         (date ? '\n\u2022 Preferred date: ' + date : '') +
         (notes ? '\n\u2022 Notes: ' + notes : '') +
-        '\n\n\u2022 Deposit: paying now via your payment link' +
-        '\n\u2022 Remaining balance: after my appointment';
-      window.open(TOROPAY_LINK, '_blank');
+        '';
+
+      checkoutBtn.disabled = true;
+      checkoutBtn.textContent = 'Starting payment...';
+      let payUrl = TOROPAY_LINK;
+      if (email) {
+        try {
+          const res = await fetch('/api/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              sets: ks.map(k => ({ id: k, qty: cart[k] })),
+              customer: { name: name, email: email, contact: contact, date: date, notes: notes }
+            })
+          });
+          const data = await res.json();
+          if (res.ok && data.checkout_url) { payUrl = data.checkout_url; }
+          else { console.warn('checkout API unavailable, using payment link:', data && data.error); }
+        } catch (err) {
+          console.warn('checkout API unreachable, using payment link:', err);
+        }
+      }
+      checkoutBtn.disabled = false;
+      checkoutBtn.textContent = 'Continue to payment & send order';
+      if (!window.open(payUrl, '_blank')) window.location.href = payUrl;
       (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
         window.location.href = IG_DM;
       }).catch(function(){
