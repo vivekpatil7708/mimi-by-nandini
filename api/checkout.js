@@ -24,10 +24,16 @@ const MAX_QTY_PER_SET = 20;
 const MAX_SETS = 25;
 
 // Single source of truth for pricing. Keep in sync with the prices shown on the page.
+const PRICES = {
+  '01': 1299, '02': 1399, '03': 1499, '04': 1599,
+  '05': 1699, '06': 1799, '07': 1899, '08': 1999,
+  '09': 2099, '10': 2199, '11': 2299, '12': 2399,
+  '13': 2499, '14': 2599
+};
 const CATALOG = {};
 for (let n = 1; n <= 14; n++) {
   const id = String(n).padStart(2, '0');
-  CATALOG[id] = { id, name: 'Set ' + id, price: n <= 5 ? 1499 : n <= 10 ? 1899 : 2299 };
+  CATALOG[id] = { id, name: 'Set ' + id, price: PRICES[id] };
 }
 
 const rateLimit = new Map();
