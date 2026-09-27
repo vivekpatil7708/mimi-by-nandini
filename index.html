@@ -709,13 +709,11 @@
 </aside>
 
 <script>
-  const TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f';
   const IG_DM = 'https://ig.me/m/xd_nandinee';
 
-  // Booking CTA: open the payment link, then DM to confirm the appointment
+  // Booking CTA: send the customer to DM to pick a set and confirm the appointment
   document.getElementById('bookDeposit').addEventListener('click', function(e){
     e.preventDefault();
-    if (!window.open(TOROPAY_LINK, '_blank')) window.location.href = TOROPAY_LINK;
     window.location.href = IG_DM;
   });
 
@@ -999,7 +997,8 @@
 
       checkoutBtn.disabled = true;
       checkoutBtn.textContent = 'Starting payment...';
-      let payUrl = TOROPAY_LINK;
+      let payUrl = null;
+      let payIssue = false;
       if (email) {
         try {
           const res = await fetch('/api/checkout', {
@@ -1012,14 +1011,21 @@
           });
           const data = await res.json();
           if (res.ok && data.checkout_url) { payUrl = data.checkout_url; }
-          else { console.warn('checkout API unavailable, using payment link:', data && data.error); }
+          else { payIssue = true; console.warn('checkout API unavailable:', data && data.error); }
         } catch (err) {
-          console.warn('checkout API unreachable, using payment link:', err);
+          payIssue = true;
+          console.warn('checkout API unreachable:', err);
         }
+      } else {
+        payIssue = true;
       }
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = 'Continue to payment & send order';
-      if (!window.open(payUrl, '_blank')) window.location.href = payUrl;
+      if (payUrl) {
+        if (!window.open(payUrl, '_blank')) window.location.href = payUrl;
+      } else if (payIssue) {
+        alert('Online payment is not available at this moment. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.');
+      }
       (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
         window.location.href = IG_DM;
       }).catch(function(){

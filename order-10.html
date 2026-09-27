@@ -75,7 +75,6 @@
   </main>
 </div>
 <script>
-    var TOROPAY_LINK = 'https://staging.toropay.co.in/paylink/mclkuved6f';
   var IG_DM = 'https://ig.me/m/xd_nandinee';
   var nameEl=document.getElementById('name'), contactEl=document.getElementById('contact'),
       qtyEl=document.getElementById('qty'), dateEl=document.getElementById('date'), emailEl=document.getElementById('email'),
@@ -97,7 +96,8 @@
     var submitBtn = e.target.querySelector('button[type=submit]');
     var original = submitBtn.textContent;
     var msg = buildMsg();
-    var payUrl = TOROPAY_LINK;
+    var payUrl = null;
+    var payIssue = false;
     if(emailEl.value.trim()){
       submitBtn.disabled = true;
       submitBtn.textContent = 'Starting payment...';
@@ -118,14 +118,16 @@
         });
         var data = await res.json();
         if(res.ok && data.checkout_url){ payUrl = data.checkout_url; }
-        else { console.warn('checkout API unavailable, using payment link:', data && data.error); }
+        else { payIssue = true; console.warn('checkout API unavailable:', data && data.error); }
       } catch(err) {
-        console.warn('checkout API unreachable, using payment link:', err);
+        payIssue = true;
+        console.warn('checkout API unreachable:', err);
       }
       submitBtn.disabled = false;
       submitBtn.textContent = original;
     }
-    if(!window.open(payUrl, '_blank')){ window.location.href = payUrl; }
+    if(payUrl){ if(!window.open(payUrl, '_blank')){ window.location.href = payUrl; } }
+    else { alert('Online payment is not available at this moment. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.'); }
     sendDM(msg);
   });
   document.getElementById('dmOnly').addEventListener('click', function(){
