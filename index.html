@@ -683,8 +683,8 @@
     </div>
     <div class="cf-row">
       <div>
-        <label for="cEmail">Email (for the receipt)</label>
-        <input id="cEmail" type="email" placeholder="you@example.com">
+        <label for="cEmail">Email (for the receipt) *</label>
+        <input id="cEmail" type="email" required placeholder="you@example.com">
       </div>
       <div>
         <label for="cDate">Preferred date</label>
@@ -984,6 +984,7 @@
       const date = document.getElementById('cDate').value;
       const notes = document.getElementById('cNotes').value.trim();
       if (!name) { alert('Please enter your name'); return; }
+      if (!email) { alert('Please enter your email - we need it to send your receipt and payment link'); cEmail.focus(); return; }
       const lines = ks.map(k => '\u2022 ' + catalog[k].name + ' \u00D7 ' + cart[k] + ' \u2014 ' + fmt(catalog[k].price) + ' each').join('\n');
       const msg = 'Hi Mimi by Nandini! I\'d like to book ' + t.sets + ' set' + (t.sets === 1 ? '' : 's') + ':\n\n' + lines +
         '\n\n\u2022 Total: ' + fmt(t.total) +
@@ -1021,15 +1022,26 @@
       }
       checkoutBtn.disabled = false;
       checkoutBtn.textContent = 'Continue to payment & send order';
+      const copyMsg = navigator.clipboard
+        ? navigator.clipboard.writeText(msg).catch(function(){ return false; })
+        : Promise.resolve(false);
       if (payUrl) {
-        if (!window.open(payUrl, '_blank')) window.location.href = payUrl;
-      } else if (payIssue) {
-        alert('Online payment is not available at this moment. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.');
+        // Payment page is open - do NOT navigate this tab away, it hides the payment tab.
+        const win = window.open(payUrl, '_blank');
+        if (win) { try { win.focus(); } catch (e) {} }
+        else { window.location.href = payUrl; }
+        copyMsg.then(function(ok) {
+          if (!ok) window.prompt('Copy this order details:', msg);
+          checkoutBtn.textContent = 'Payment opened - complete it in the other tab';
+        });
+        return;
       }
-      (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
-        window.location.href = IG_DM;
-      }).catch(function(){
-        window.prompt('Copy this order and paste it in the DM:', msg);
+      if (payIssue) {
+        alert('We could not start the payment just now. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.');
+      }
+      copyMsg.then(function(ok) {
+        if (ok) window.location.href = IG_DM;
+        else window.prompt('Copy this order and paste it in the DM:', msg);
       });
     });
 

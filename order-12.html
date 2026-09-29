@@ -53,8 +53,8 @@
         <input id="name" required placeholder="Full name">
         <label for="contact">Contact (Instagram or phone)</label>
         <input id="contact" required placeholder="@yourhandle or phone number">
-        <label for="email">Email (for the payment receipt)</label>
-        <input id="email" type="email" placeholder="you@example.com">
+        <label for="email">Email (for the payment receipt) *</label>
+        <input id="email" type="email" required placeholder="you@example.com">
         <label for="qty">Quantity</label>
         <select id="qty">
           <option>1 set</option>
@@ -84,6 +84,14 @@
         date=dateEl.value, notes=notesEl.value, product=productEl.value;
     return 'Hi Mimi by Nandini! I\'d like to book:\n\n\u2022 Design: '+product+'\n\u2022 Quantity: '+qty+'\n\u2022 Set price: '+priceEl.value+'\n\u2022 Name: '+name+'\n\u2022 Email: '+email+'\n\u2022 Contact: '+contact+(date?'\n\u2022 Preferred date: '+date:'')+(notes?'\n\u2022 Notes: '+notes:'')+'\n\n\u2022 Paying in full now';
   }
+  function copyMsg(msg){
+    (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
+      var b = document.querySelector('#orderForm button[type=submit]');
+      if(b) b.textContent = 'Payment opened - complete it in the other tab';
+    }).catch(function(){
+      window.prompt('Copy this order details:', msg);
+    });
+  }
   function sendDM(msg){
     (navigator.clipboard ? navigator.clipboard.writeText(msg) : Promise.reject()).then(function(){
       window.location.href = IG_DM;
@@ -98,6 +106,12 @@
     var msg = buildMsg();
     var payUrl = null;
     var payIssue = false;
+    if(!nameEl.value.trim()){ alert('Please enter your name'); return; }
+    if(!emailEl.value.trim()){
+      alert('Please enter your email - we need it to send your receipt and payment link');
+      emailEl.focus();
+      return;
+    }
     if(emailEl.value.trim()){
       submitBtn.disabled = true;
       submitBtn.textContent = 'Starting payment...';
@@ -126,8 +140,16 @@
       submitBtn.disabled = false;
       submitBtn.textContent = original;
     }
-    if(payUrl){ if(!window.open(payUrl, '_blank')){ window.location.href = payUrl; } }
-    else { alert('Online payment is not available at this moment. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.'); }
+    if(payUrl){
+      var win = window.open(payUrl, '_blank');
+      if(win){ try { win.focus(); } catch(err){} }
+      else { window.location.href = payUrl; }
+      copyMsg(msg);
+      return;
+    }
+    if(payIssue){
+      alert('We could not start the payment just now. Your order details are ready - send them on Instagram and we will confirm your slot and share the correct payment link.');
+    }
     sendDM(msg);
   });
   document.getElementById('dmOnly').addEventListener('click', function(){
